@@ -75,7 +75,7 @@ public class ParserGames {
                 }
             }
         }
-        job.getJobDataMap().put("rangeBegin", rangeBegin);
+        job.getJobDataMap().put("range1Begin", rangeBegin);
         job.getJobDataMap().put("rangeEnd", rangeEnd);
         job.getJobDataMap().put("parentDirectory", parentDirectory);
     }
