@@ -288,6 +288,10 @@ public class Parser {
             dir.delete();
         }
         for (GameFl gameFl : files) {
+            if (gameFl.isCopyrightViolation()) {
+                gameFl.setCause_unload("copyright violation");
+                continue;
+            }
             File file = new File(filesDirectory, gameFl.getName());
             FileCheck fileCheck = fileExists(file, gameFl);
             if (!fileCheck.isNeedToDownload()) {
@@ -534,13 +538,15 @@ public class Parser {
                 .child(0)
                 .children();
         FileType fileType;
-        String fileLink;
+        String fileLink = null;
         String[] fileDlText;
         long fileApproxSize = 0;
         String fileDateText;
         String fileDesc;
         String fileTempLink;
-        String fileName;
+        String fileName = null;
+        String specifyFileLink;
+        boolean copyrightViolation;
         Unit fileUnit = null;
         String fileProvided;
         Elements groups;
@@ -595,17 +601,21 @@ public class Parser {
             } else {
                 fileProvided = "";
             }
-            fileLink = new StringBuilder(this.baseUrl)
-                    .append("game/download/")
-                    .append(file
-                            .child(1)
-                            .child(0)
-                            .child(0)
-                            .child(0)
-                            .attr("href"))
-                    .toString();
-            fileTempLink = getFileTempLink(fileLink, "");
-            fileName = fileTempLink.substring(fileTempLink.lastIndexOf('/') + 1);
+            specifyFileLink = file
+                    .child(1)
+                    .child(0)
+                    .child(0)
+                    .child(0)
+                    .attr("href");
+            copyrightViolation = specifyFileLink.isEmpty();
+            if (!copyrightViolation) {
+                fileLink = new StringBuilder(this.baseUrl)
+                        .append("game/download/")
+                        .append(specifyFileLink)
+                        .toString();
+                fileTempLink = getFileTempLink(fileLink, "");
+                fileName = fileTempLink.substring(fileTempLink.lastIndexOf('/') + 1);
+            }
             result.add(new GameFl(
                     fileType,
                     fileApproxSize,
@@ -617,7 +627,8 @@ public class Parser {
                     fileUnit,
                     fileProvided,
                     fileLink,
-                    fileProperties));
+                    fileProperties,
+                    copyrightViolation));
         }
         return result;
     }

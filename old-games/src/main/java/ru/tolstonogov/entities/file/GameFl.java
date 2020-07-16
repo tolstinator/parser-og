@@ -30,7 +30,9 @@ public class GameFl {
 
     private String cause_unload;
 
-    public GameFl(FileType type, long approxSize, GregorianCalendar date, String description, String name, Unit unit, String provided, String link, List<FileProperty> properties) {
+    private final boolean copyrightViolation;
+
+    public GameFl(FileType type, long approxSize, GregorianCalendar date, String description, String name, Unit unit, String provided, String link, List<FileProperty> properties, boolean copyrightViolation) {
         this.type = type;
         this.approxSize = approxSize;
         this.date = date;
@@ -40,6 +42,7 @@ public class GameFl {
         this.provided = provided;
         this.link = link;
         this.properties = properties;
+        this.copyrightViolation = copyrightViolation;
     }
 
     public FileType getType() {
@@ -139,6 +142,10 @@ public class GameFl {
 
     public void setCause_unload(String cause_unload) {
         this.cause_unload = cause_unload;
+    }
+
+    public boolean isCopyrightViolation() {
+        return copyrightViolation;
     }
 
     @Override
