@@ -78,10 +78,16 @@ public class GameFl {
     }
 
     public String getName() {
-        return "id_"
-                + this.getLink().substring(this.getLink().indexOf('=') + 1, this.getLink().indexOf('&'))
-                + "_"
-                + this.name;
+        String result;
+        if (this.getLink() == null) {
+            result = "";
+        } else {
+            result = "id_"
+                    + this.getLink().substring(this.getLink().indexOf('=') + 1, this.getLink().indexOf('&'))
+                    + "_"
+                    + this.name;
+        }
+        return result;
     }
 
     public void setName(String name) {

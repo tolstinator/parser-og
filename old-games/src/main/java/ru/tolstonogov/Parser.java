@@ -538,13 +538,13 @@ public class Parser {
                 .child(0)
                 .children();
         FileType fileType;
-        String fileLink = null;
+        String fileLink;
         String[] fileDlText;
         long fileApproxSize = 0;
         String fileDateText;
         String fileDesc;
         String fileTempLink;
-        String fileName = null;
+        String fileName;
         String specifyFileLink;
         boolean copyrightViolation;
         Unit fileUnit = null;
@@ -615,6 +615,9 @@ public class Parser {
                         .toString();
                 fileTempLink = getFileTempLink(fileLink, "");
                 fileName = fileTempLink.substring(fileTempLink.lastIndexOf('/') + 1);
+            } else {
+                fileLink = null;
+                fileName = null;
             }
             result.add(new GameFl(
                     fileType,
