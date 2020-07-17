@@ -151,7 +151,7 @@ public class Parser {
             LOG.info(new StringBuilder("+ ")
                     .append(gameDirectoryName).toString());
             if (parentDirectory != null) {
-                // TODO: extra directory -> keep (for review), extra files - to remove.
+                // TODO: extra directory -> keep (for review), extra files - to remove (without copyright violation).
                 gameDirectory = new File(gamesDirectory, gameDirectoryName
                         .replaceAll("[:/*?\"]", ""));
                 startFilesDownload = System.currentTimeMillis();
