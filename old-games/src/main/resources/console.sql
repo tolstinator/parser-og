@@ -93,6 +93,7 @@ from
 
 select
     g.link_id as "link_id",
+    '=ГИПЕРССЫЛКА(G;B)' as "hyper",
     g.name as "name",
     g.released as "released",
     case
@@ -105,17 +106,13 @@ select
         end as "saved",
     'https://www.old-games.ru/game/'||g.link_id||'.html' as "link",
     gnr.name as "genre",
---     round(gfs.size/1024/1024,2) as "size",
     round(gfs.size/1024/1024) as "size",
     gd.name as "developers",
     gp.name as "publishers",
     p.name as "platform",
---     gan.name as "alt_names",
     g.favorites as "favorites",
     g.completions as "completions",
     g.bookmarks as "bookmarks"
---     g.review as "review",
---     g.cause_load as "cause_load"
 from
     games g left outer join genres gnr on g.id_genre = gnr.id
             left outer join platforms p on g.id_platform = p.id
@@ -148,4 +145,4 @@ from
                              group by
                                  gf.id_game) gfs on g.id=gfs.id_game
 order by
-    g.id desc;
+    size desc;
