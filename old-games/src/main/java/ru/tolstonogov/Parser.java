@@ -888,7 +888,7 @@ public class Parser {
         String propertyName;
         String description;
         Elements properties;
-        Elements groups = doc
+        Element gameGroupsElement = doc
                 .getElementById("maintable")
                 .child(0)
                 .child(0)
@@ -899,17 +899,20 @@ public class Parser {
                 .child(0)
                 .child(0)
                 .child(0)
-                .child(1)
-                .child(3)
-                .getElementsByClass("game-groups").get(0)
-                .children();
-        for (Element group : groups) {
-            groupName = new GameGroupProperties(group.textNodes().get(0).text().substring(0, group.textNodes().get(0).text().length() - 1));
-            properties = group.getElementsByClass("tip-list");
-            for (Element property : properties) {
-                propertyName = property.text();
-                description = property.attr("title");
-                result.add(new GameProperty(groupName, propertyName, description));
+                .child(1);
+        if (gameGroupsElement.children().size() > 3) {
+            Elements groups = gameGroupsElement
+                    .child(3)
+                    .getElementsByClass("game-groups").get(0)
+                    .children();
+            for (Element group : groups) {
+                groupName = new GameGroupProperties(group.textNodes().get(0).text().substring(0, group.textNodes().get(0).text().length() - 1));
+                properties = group.getElementsByClass("tip-list");
+                for (Element property : properties) {
+                    propertyName = property.text();
+                    description = property.attr("title");
+                    result.add(new GameProperty(groupName, propertyName, description));
+                }
             }
         }
         return result;
