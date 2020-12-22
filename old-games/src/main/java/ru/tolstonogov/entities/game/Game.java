@@ -44,7 +44,9 @@ public class Game {
 
     private final boolean saved;
 
-    public Game(String name, List<AltName> altNames, Genre genre, List<Company> developers, List<Company> publishers, int released, Platform platform, int favorites, int completions, int bookmarks, String review, List<GameFl> files, List<GameProperty> properties, List<Screenshot> screenshots, int linkId, boolean wasted, boolean saved) {
+    private final boolean documented;
+
+    public Game(String name, List<AltName> altNames, Genre genre, List<Company> developers, List<Company> publishers, int released, Platform platform, int favorites, int completions, int bookmarks, String review, List<GameFl> files, List<GameProperty> properties, List<Screenshot> screenshots, int linkId, boolean wasted, boolean saved, boolean documented) {
         this.name = name;
         this.altNames = altNames;
         this.genre = genre;
@@ -62,6 +64,7 @@ public class Game {
         this.linkId = linkId;
         this.wasted = wasted;
         this.saved = saved;
+        this.documented = documented;
     }
 
     public String getName() {
@@ -198,6 +201,10 @@ public class Game {
 
     public boolean isSaved() {
         return saved;
+    }
+
+    public boolean isDocumented() {
+        return documented;
     }
 
     @Override

@@ -23,13 +23,14 @@ public class ParserGames {
     private static final String KEY_RANGE_BEGIN = "rb=";
     private static final String KEY_RANGE_END = "re=";
     private static final String DEFAULT_RANGE_BEGIN = "0";
-    private static final String DEFAULT_RANGE_END = "10500";
+    private static final String DEFAULT_RANGE_END = "10600";
     private static final String BASE_URL = "https://www.old-games.ru/";
     private static final String NAME_OG = "Old-Games.RU";
     private static final String NAME_OG_WASTED = "Old-Games.RU_wasted";
     private static final String NAME_FILE_PROPERTIES = "app.properties";
     private static final String NAME_FILE_WASTED = "wasted_games";
     private static final String NAME_FILE_SAVED = "saved_games";
+    private static final String NAME_FILE_DOCUMENTED = "documented_games";
 
     private static String getCron(String prop) {
         String result = null;
@@ -87,7 +88,7 @@ public class ParserGames {
         JobDetail job = newJob(JobParserGames.class)
                 .withIdentity("jobParserGames")
                 .build();
-        DataBaseGames dbV = new DataBaseGames(NAME_FILE_PROPERTIES, NAME_FILE_WASTED, NAME_FILE_SAVED);
+        DataBaseGames dbV = new DataBaseGames(NAME_FILE_PROPERTIES, NAME_FILE_WASTED, NAME_FILE_SAVED, NAME_FILE_DOCUMENTED);
         putJobData(job, args, dbV);
         Trigger trigger = newTrigger()
                 .withIdentity("triggerParserGames")

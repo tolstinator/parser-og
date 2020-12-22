@@ -41,6 +41,8 @@ public class Parser {
     private static final String FILES_DIRECTORY_NAME = "files";
     private static final String SCREENSHOTS_DIRECTORY_NAME = "screenshots";
     private static final String NOT_EXIST = "not exist";
+    private static final String COPYRIGHT_VIOLATION = "copyright violation";
+    private static final String ONLY_DOCUMENTS = "only documents";
     private static final String DESIGNATION_UNIT_B = "B";
     private static final String DESIGNATION_UNIT_KB = "KB";
     private static final String DESIGNATION_UNIT_MB = "MB";
@@ -125,7 +127,8 @@ public class Parser {
                     getGameScreenshots(page),
                     page,
                     dbV.checkWasted(page),
-                    dbV.checkSaved(page));
+                    dbV.checkSaved(page),
+                    dbV.checkDocumented(page));
             // TODO: https://www.old-games.ru/game/covers/7499.html - the example of good covers
 //            try {
 //                if (Jsoup.connect(new StringBuilder(this.baseUrl).append("game/covers/")
@@ -278,7 +281,6 @@ public class Parser {
         long startFileDownload;
         long finishFileDownload;
         long gameDownloadSize = 0;
-        int fileIndex = 0;
         File[] dirs = filesDirectory.listFiles(File::isDirectory);
         for (File dir : dirs) {
             File[] fls = dir.listFiles();
@@ -289,7 +291,11 @@ public class Parser {
         }
         for (GameFl gameFl : files) {
             if (gameFl.isCopyrightViolation()) {
-                gameFl.setCause_unload("copyright violation");
+                gameFl.setCause_unload(COPYRIGHT_VIOLATION);
+                continue;
+            }
+            if (game.isDocumented() && !gameFl.getType().getName().equals("Документация")) {
+                gameFl.setCause_unload(ONLY_DOCUMENTS);
                 continue;
             }
             File file = new File(filesDirectory, gameFl.getName());

@@ -29,10 +29,13 @@ public class DataBaseGames {
 
     private final String gamesSavedResource;
 
-    public DataBaseGames(String properties, String gamesWastedResource, String gamesSavedResource) {
+    private final String gamesDocumentedResource;
+
+    public DataBaseGames(String properties, String gamesWastedResource, String gamesSavedResource, String gamesDocumentedResource) {
         this.properties = properties;
         this.gamesWastedResource = gamesWastedResource;
         this.gamesSavedResource = gamesSavedResource;
+        this.gamesDocumentedResource = gamesDocumentedResource;
         this.init();
     }
 
@@ -55,6 +58,7 @@ public class DataBaseGames {
         createTables();
         fillGamesWasted(this.gamesWastedResource);
         fillGamesSaved(this.gamesSavedResource);
+        fillGamesDocumented(this.gamesDocumentedResource);
     }
 
     private void fillGamesWasted(String gamesWastedResource) {
@@ -101,6 +105,28 @@ public class DataBaseGames {
         }
     }
 
+    private void fillGamesDocumented(String gamesDocumentedResource) {
+        try (InputStream in = DataBaseGames.class.getClassLoader().getResourceAsStream(gamesDocumentedResource)) {
+            if (in != null) {
+                Scanner scanDocumented = new Scanner(in);
+                String[] docsGameLine;
+                while (scanDocumented.hasNextLine()) {
+                    docsGameLine = scanDocumented.nextLine().split(DELIMITER_IN_GAME_RESOURCES);
+                    if (docsGameLine.length != 3) {
+                        continue;
+                    }
+                    addDocumentedGame(new DocumentedGame(
+                            Integer.parseInt(docsGameLine[0]),
+                            docsGameLine[1],
+                            Integer.parseInt(docsGameLine[2])
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+        }
+    }
+
     private void dropTables() {
         try (PreparedStatement psGamesAltNames = connection.prepareStatement("DROP TABLE IF EXISTS games_alt_names");
              PreparedStatement psGamesDevelopers = connection.prepareStatement("DROP TABLE IF EXISTS games_developers");
@@ -113,6 +139,7 @@ public class DataBaseGames {
              PreparedStatement psGames = connection.prepareStatement("DROP TABLE IF EXISTS games");
              PreparedStatement psGamesWasted = connection.prepareStatement("DROP TABLE IF EXISTS games_wasted");
              PreparedStatement psGamesSaved = connection.prepareStatement("DROP TABLE IF EXISTS games_saved");
+             PreparedStatement psGamesDocumented = connection.prepareStatement("DROP TABLE IF EXISTS games_documented");
              PreparedStatement psGenres = connection.prepareStatement("DROP TABLE IF EXISTS genres");
              PreparedStatement psCompanies = connection.prepareStatement("DROP TABLE IF EXISTS companies");
              PreparedStatement psPlatforms = connection.prepareStatement("DROP TABLE IF EXISTS platforms");
@@ -131,6 +158,7 @@ public class DataBaseGames {
             psGames.executeUpdate();
             psGamesWasted.executeUpdate();
             psGamesSaved.executeUpdate();
+            psGamesDocumented.executeUpdate();
             psGenres.executeUpdate();
             psCompanies.executeUpdate();
             psPlatforms.executeUpdate();
@@ -158,7 +186,7 @@ public class DataBaseGames {
                      "id_group int REFERENCES groups_properties_games(id)",
                      "name_property varchar(200)",
                      "description varchar(1000)"));
-             PreparedStatement psGames = connection.prepareStatement(String.format("CREATE TABLE IF NOT EXISTS games (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+             PreparedStatement psGames = connection.prepareStatement(String.format("CREATE TABLE IF NOT EXISTS games (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                      "id SERIAL PRIMARY KEY",
                      "name varchar(200)",
                      "id_genre int REFERENCES genres(id)",
@@ -171,13 +199,19 @@ public class DataBaseGames {
                      "link_id int",
                      "cause_load varchar(200)",
                      "wasted boolean",
-                     "saved boolean"));
+                     "saved boolean",
+                     "documented boolean"));
              PreparedStatement psGamesWasted = connection.prepareStatement(String.format("CREATE TABLE IF NOT EXISTS games_wasted (%s, %s, %s, %s)",
                      "id SERIAL PRIMARY KEY",
                      "link_id int",
                      "name varchar(200)",
                      "released int"));
              PreparedStatement psGamesSaved = connection.prepareStatement(String.format("CREATE TABLE IF NOT EXISTS games_saved (%s, %s, %s, %s)",
+                     "id SERIAL PRIMARY KEY",
+                     "link_id int",
+                     "name varchar(200)",
+                     "released int"));
+             PreparedStatement psGamesDocumented = connection.prepareStatement(String.format("CREATE TABLE IF NOT EXISTS games_documented (%s, %s, %s, %s)",
                      "id SERIAL PRIMARY KEY",
                      "link_id int",
                      "name varchar(200)",
@@ -247,6 +281,7 @@ public class DataBaseGames {
             psGames.executeUpdate();
             psGamesWasted.executeUpdate();
             psGamesSaved.executeUpdate();
+            psGamesDocumented.executeUpdate();
             psGamesAltNames.executeUpdate();
             psGamesDevelopers.executeUpdate();
             psGamesPublishers.executeUpdate();
@@ -286,6 +321,18 @@ public class DataBaseGames {
         }
     }
 
+    public void addDocumentedGame(DocumentedGame documentedGame) {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "INSERT INTO games_documented (link_id, name, released) VALUES (?, ?, ?)")) {
+            ps.setInt(1, documentedGame.getLinkId());
+            ps.setString(2, documentedGame.getName());
+            ps.setInt(3, documentedGame.getReleased());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+    }
+
     public boolean checkWasted(int idGame) {
         boolean result = false;
         //TODO: maybe without id
@@ -312,10 +359,23 @@ public class DataBaseGames {
         return result;
     }
 
+    public boolean checkDocumented(int idGame) {
+        boolean result = false;
+        //TODO: maybe without id
+        try (PreparedStatement ps = connection.prepareStatement("SELECT id FROM games_documented WHERE link_id=?")) {
+            ps.setInt(1, idGame);
+            ResultSet rs = ps.executeQuery();
+            result = rs.next();
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+        return result;
+    }
+
     public int addGame(Game game, int idGenre, int idPlatform) {
         int result = 0;
         try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO games (name, id_genre, released, id_platform, favorites, completions, bookmarks, review, link_id, cause_load, wasted, saved) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "INSERT INTO games (name, id_genre, released, id_platform, favorites, completions, bookmarks, review, link_id, cause_load, wasted, saved, documented) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
              PreparedStatement psId = connection.prepareStatement("SELECT id FROM games WHERE link_id=?")) {
             ps.setString(1, game.getName());
             ps.setInt(2, idGenre);
@@ -329,6 +389,7 @@ public class DataBaseGames {
             ps.setString(10, game.getCause_load());
             ps.setBoolean(11, game.isWasted());
             ps.setBoolean(12, game.isSaved());
+            ps.setBoolean(13, game.isDocumented());
             ps.executeUpdate();
             psId.setInt(1, game.getLinkId());
             ResultSet rs = psId.executeQuery();
