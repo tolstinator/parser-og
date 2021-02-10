@@ -76,32 +76,32 @@ select gw.link_id  as "link_id",
 from games_saved gw
 ;
 
-select
-    g.link_id                                                as "link_id",
-    '=ГИПЕРССЫЛКА(H' || row_number() over (order by size desc) + 1 || ';' || 'D' || row_number() over (order by size desc) + 1 || ')'                                      as "hyper",
-    g.released                                               as "released",
-    g.name                                                   as "name",
-    case
-        when g.wasted then '*'
-        else ''
-        end                                                  as "wasted",
-    case
-        when g.saved then '*'
-        else ''
-        end                                                  as "saved",
-    case
-        when g.documented then '*'
-        else ''
-        end                                                  as "documented",
-    'https://www.old-games.ru/game/' || g.link_id || '.html' as "link",
-    gnr.name                                                 as "genre",
-    round(gfs.size / 1024 / 1024)                            as "size",
-    gd.name                                                  as "developers",
-    gp.name                                                  as "publishers",
-    p.name                                                   as "platform",
-    g.favorites                                              as "favorites",
-    g.completions                                            as "completions",
-    g.bookmarks                                              as "bookmarks"
+select g.link_id                                                as "link_id",
+       '=ГИПЕРССЫЛКА(I' || row_number() over (order by size desc) + 1 || ';' || 'H' ||
+       row_number() over (order by size desc) + 1 || ')'        as "hyper",
+       g.released                                               as "released",
+       case
+           when g.wasted then '*'
+           else ''
+           end                                                  as "wasted",
+       case
+           when g.saved then '*'
+           else ''
+           end                                                  as "saved",
+       case
+           when g.documented then '*'
+           else ''
+           end                                                  as "documented",
+       ''                                                       as "to check",
+       g.name                                                   as "name",
+       'https://www.old-games.ru/game/' || g.link_id || '.html' as "link",
+       gnr.name                                                 as "genre",
+       round(gfs.size / 1024 / 1024)                            as "size",
+       gd.name                                                  as "developers",
+       gp.name                                                  as "publishers",
+       p.name                                                   as "platform",
+       g.favorites                                              as "favorites",
+       gl.language                                              as "language"
 from games g
          left outer join genres gnr on g.id_genre = gnr.id
          left outer join platforms p on g.id_platform = p.id
@@ -123,4 +123,12 @@ from games g
                                  sum(gf.size) as "size"
                           from games_files gf
                           group by gf.id_game) gfs on g.id = gfs.id_game
-order by size desc;
+         left outer join (select g.id,
+                                 string_agg(pg.name_property, ', ') as "language"
+                          from games g
+                                   left outer join games_properties gp on g.id = gp.id_game
+                                   left outer join properties_games pg on gp.id_property = pg.id
+                                   left outer join groups_properties_games gpg on pg.id_group = gpg.id
+                          where gpg.name = 'Язык'
+                          group by g.id) gl on g.id = gl.id
+order by g.id desc;
