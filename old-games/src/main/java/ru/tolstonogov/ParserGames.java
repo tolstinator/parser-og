@@ -50,6 +50,7 @@ public class ParserGames {
 //        TODO: check: args[].
 //        TODO: args[0] contains only name of properties file, and when jar is running,
 //         the program finds properties file with name in args[0] inside jar, but not in working directory.
+//        TODO: add link to same games.
         job.getJobDataMap().put("dbV", dbV);
         job.getJobDataMap().put("baseUrl", BASE_URL);
         job.getJobDataMap().put("nameOg", NAME_OG);
