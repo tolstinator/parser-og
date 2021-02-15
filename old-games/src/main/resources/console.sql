@@ -77,8 +77,8 @@ from games_saved gw
 ;
 
 select g.link_id                                                as "link_id",
-       '=ГИПЕРССЫЛКА(I' || row_number() over (order by size desc) + 1 || ';' || 'H' ||
-       row_number() over (order by size desc) + 1 || ')'        as "hyper",
+       '=ГИПЕРССЫЛКА(I' || row_number() over (order by link_id desc) + 1 || ';' || 'H' ||
+       row_number() over (order by link_id desc) + 1 || ')'        as "hyper",
        g.released                                               as "released",
        case
            when g.wasted then '*'
