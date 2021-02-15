@@ -82,7 +82,7 @@ select g.link_id                                                as "link_id",
        g.released                                               as "released",
        case
            when g.wasted then '*'
-           else ''
+           el se ''
            end                                                  as "wasted",
        case
            when g.saved then '*'
