@@ -27,10 +27,10 @@ public class ParserGames {
     private static final String BASE_URL = "https://www.old-games.ru/";
     private static final String NAME_OG = "Old-Games.RU";
     private static final String NAME_OG_WASTED = "Old-Games.RU_wasted";
-    private static final String NAME_FILE_PROPERTIES = "app.properties";
-    private static final String NAME_FILE_WASTED = "wasted_games";
-    private static final String NAME_FILE_SAVED = "saved_games";
-    private static final String NAME_FILE_DOCUMENTED = "documented_games";
+    private static final String NAME_FILE_PROPERTIES = "src/main/resources/app.properties";
+    private static final String NAME_FILE_WASTED = "src/main/resources/wasted_games";
+    private static final String NAME_FILE_SAVED = "src/main/resources/saved_games";
+    private static final String NAME_FILE_DOCUMENTED = "src/main/resources/documented_games";
 
     private static String getCron(String prop) {
         String result = null;
