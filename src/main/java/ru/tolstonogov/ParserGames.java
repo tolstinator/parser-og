@@ -2,20 +2,11 @@ package ru.tolstonogov;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 public class ParserGames {
     private static final Logger LOG = LogManager.getLogger(ParserGames.class.getName());
@@ -32,29 +23,27 @@ public class ParserGames {
     private static final String NAME_FILE_SAVED = "src/main/resources/saved_games";
     private static final String NAME_FILE_DOCUMENTED = "src/main/resources/documented_games";
 
-    private static String getCron(String prop) {
-        String result = null;
-        try (InputStream in = ParserGames.class.getClassLoader().getResourceAsStream(prop)) {
-            Properties config = new Properties();
-            if (in != null) {
-                config.load(in);
-            }
-            result = config.getProperty("cron.time");
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-        }
-        return result;
+    private void execute(DataBaseGames dbV,
+                         String rangeBegin,
+                         String rangeEnd,
+                         File parentDirectory) {
+        LOG.info(new StringBuilder("Parser: start at ")
+                .append(new GregorianCalendar(TimeZone.getTimeZone("GMT+3:00")).getTime())
+                .append('.'));
+        Parser parser = new Parser(BASE_URL, dbV);
+        parser.parse(Integer.parseInt(rangeBegin), Integer.parseInt(rangeEnd), parentDirectory, NAME_OG, NAME_OG_WASTED);
+        LOG.info(new StringBuilder("Parser: finish at ")
+                .append(new GregorianCalendar(TimeZone.getTimeZone("GMT+3:00")).getTime())
+                .append('.'));
     }
 
-    private static void putJobData(JobDetail job, String[] args, DataBaseGames dbV) {
+    public static void main(String[] args) {
+        //TODO: add sessions.
 //        TODO: check: args[].
 //        TODO: args[0] contains only name of properties file, and when jar is running,
 //         the program finds properties file with name in args[0] inside jar, but not in working directory.
 //        TODO: add link to same games.
-        job.getJobDataMap().put("dbV", dbV);
-        job.getJobDataMap().put("baseUrl", BASE_URL);
-        job.getJobDataMap().put("nameOg", NAME_OG);
-        job.getJobDataMap().put("nameOgWasted", NAME_OG_WASTED);
+        DataBaseGames dbV = new DataBaseGames(NAME_FILE_PROPERTIES, NAME_FILE_WASTED, NAME_FILE_SAVED, NAME_FILE_DOCUMENTED);
         String rangeBegin = DEFAULT_RANGE_BEGIN;
         String rangeEnd = DEFAULT_RANGE_END;
         File parentDirectory = null;
@@ -77,28 +66,9 @@ public class ParserGames {
                 }
             }
         }
-        job.getJobDataMap().put("rangeBegin", rangeBegin);
-        job.getJobDataMap().put("rangeEnd", rangeEnd);
-        job.getJobDataMap().put("parentDirectory", parentDirectory);
-    }
-
-    public static void main(String[] args) throws SchedulerException {
-        //TODO: add sessions.
-        Scheduler sched = new StdSchedulerFactory().getScheduler();
-        sched.start();
-        JobDetail job = newJob(JobParserGames.class)
-                .withIdentity("jobParserGames")
-                .build();
-        DataBaseGames dbV = new DataBaseGames(NAME_FILE_PROPERTIES, NAME_FILE_WASTED, NAME_FILE_SAVED, NAME_FILE_DOCUMENTED);
-        putJobData(job, args, dbV);
-        Trigger trigger = newTrigger()
-                .withIdentity("triggerParserGames")
-                .withSchedule(simpleSchedule().withIntervalInSeconds(300))
-                .build();
-//        Trigger trigger = newTrigger()
-//                .withIdentity("triggerParserGames")
-//                .withSchedule(cronSchedule(getCron(args[0])))
-//                .build();
-        sched.scheduleJob(job, trigger);
+        new ParserGames().execute(dbV,
+                rangeBegin,
+                rangeEnd,
+                parentDirectory);
     }
 }
