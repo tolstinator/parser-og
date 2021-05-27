@@ -38,7 +38,6 @@ public class ParserGames {
     }
 
     public static void main(String[] args) {
-        //TODO: add sessions.
 //        TODO: check: args[].
 //        TODO: args[0] contains only name of properties file, and when jar is running,
 //         the program finds properties file with name in args[0] inside jar, but not in working directory.
